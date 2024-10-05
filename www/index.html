@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa com OpenStreetMap</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="cordova.js"></script>
+</head>
+<body>
+    <div class="container text-center">
+        <h1>Localização Atual</h1>
+        <button id="btn-localizar" class="btn btn-primary">Mostrar Localização</button>
+        <div id="map-container" class="mt-3"></div>
+        <button id="btn-compartilhar" class="btn btn-success mt-3" style="display: none;">Compartilhar Mapa</button>
+    </div>
+
+    <script>
+        let lat, lon;
+
+        document.getElementById('btn-localizar').addEventListener('click', function() {
+            navigator.geolocation.getCurrentPosition(onSuccess, onError);
+        });
+
+        function onSuccess(position) {
+            lat = position.coords.latitude;
+            lon = position.coords.longitude;
+
+            // Atualiza o iframe com a localização atual
+            var iframeSrc = `https://www.openstreetmap.org/export/embed.html?bbox=${lon-0.01},${lat-0.01},${lon+0.01},${lat+0.01}&layer=mapnik`;
+            var iframe = `<iframe width="425" height="350" src="${iframeSrc}" style="border: 1px solid black"></iframe><br/><small><a href="https://www.openstreetmap.org/#map=16/${lat}/${lon}">Ver mapa ampliado</a></small>`;
+            document.getElementById('map-container').innerHTML = iframe;
+
+            // Exibe o botão de compartilhar
+            document.getElementById('btn-compartilhar').style.display = 'block';
+        }
+
+        function onError(error) {
+            alert('Erro ao obter localização: ' + error.message);
+        }
+
+        document.getElementById('btn-compartilhar').addEventListener('click', function() {
+            const shareData = {
+                title: 'Minha Localização',
+                text: `Veja onde estou: https://www.openstreetmap.org/#map=16/${lat}/${lon}`,
+                url: `https://www.openstreetmap.org/#map=16/${lat}/${lon}`
+            };
+
+            navigator.share(shareData)
+                .then(() => console.log('Compartilhado com sucesso'))
+                .catch((err) => console.error('Erro ao compartilhar', err));
+        });
+    </script>
+</body>
+</html>
